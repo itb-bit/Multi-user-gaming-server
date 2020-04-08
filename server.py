@@ -11,7 +11,8 @@ from PIL import Image, ImageChops
 from impo import *
 from massages_to_send import *
 import server_snake
-from multiprocessing import Process, Queue, Pipe, Value
+from multiprocessing import Process, Queue, Pipe, Value,Array
+import server_screen
 
 def send_waiting_messages(wlist):
 
@@ -48,7 +49,7 @@ def server1():
             if current_socket is server_socket:
                 (new_socket, address)= server_socket.accept()
                 open_client_sockets.append(new_socket)
-                limpo[str(new_socket)]= IMPO(new_socket,"name",address,Value('i', 1),"")
+                limpo[str(new_socket)]= IMPO(new_socket,"name",address,Value('i', 1),Array('i', range(3)),"")
 
 
 
@@ -65,20 +66,15 @@ def server1():
                 elif data[-4::] == "name":
                     limpo[str(current_socket)].name= data[:-4:]
 
-                    lat = open("C:\Users\Itay\PycharmProjects\itay\project\images\\send"+limpo[str(new_socket)].name+".png", "w")
-                    lat.close()
-                    img1 = Image.open('C:\Users\Itay\PycharmProjects\itay\project\images\p3.png')
-                    diff = ImageChops.difference(img1,img1)
-                    diff.save("C:\Users\Itay\PycharmProjects\itay\project\images\\send"+limpo[str(new_socket)].name+".png")
-                    diff.close()
-                    img1.close()
-
-
-
-                    limpo[str(current_socket)].tread = Process(target=server_snake.main_sean,args=(limpo[str(current_socket)].name,
-                                                     limpo[str(current_socket)].pos,str(limpo[str(current_socket)].socket) ,mts,))
+                    limpo[str(current_socket)].tread = Process(target=server_screen.main_sean,args=(limpo[str(current_socket)].name,
+                            limpo[str(current_socket)].pos,str(limpo[str(current_socket)].socket) ,mts,str(limpo[str(current_socket)].mouse),))
                     limpo[str(current_socket)].tread.start()
-
+                elif data[-5::] == "mouse":
+                    limpo[str(current_socket)].name= data[:-4:]
+                    b = (data).split(" ")
+                    limpo[str(current_socket)].mouse[0] = int(b[0])
+                    limpo[str(current_socket)].mouse[1] = int(b[1])
+                    limpo[str(current_socket)].mouse[2] = int(b[2])
                 else:
                     mts.put((current_socket, 'Hello, ' + data))
         send_waiting_messages(wlist)

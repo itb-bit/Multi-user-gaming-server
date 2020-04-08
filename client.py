@@ -33,6 +33,7 @@ def client():
 
     t = True
     f = True
+    last_mouse =range(3)
     data =""
 
     lat = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"lates.png", "w")
@@ -56,6 +57,11 @@ def client():
         elif config.pos!=0:
             my_socket.send(str(config.pos))
             config.pos =0
+        elif config.mouse!=last_mouse:
+            print 1
+            my_socket.send("mouse" + str(config.mouse[0]) +" "+ str(config.mouse[1])+ " "+str(config.mouse[2]))
+            last_mouse =  config.mouse
+
 
         if  len(rlist)>0:
 
@@ -63,11 +69,12 @@ def client():
             if len(data) >6 and data[-6::]=="endend":
 
                 data = data[:-6:]
+
                 if  data == "quit":
 
                     config.fin = True
                     break
-                # print data
+
 
                 while(config.img):
                     pass
@@ -170,6 +177,9 @@ def game1():
                 if event.key == pygame.K_LEFT:
 
                     config.pos = 3
+        config.mouse[0] = pygame.mouse.get_pos()[0]
+        config.mouse[1] = pygame.mouse.get_pos()[1]
+        config.mouse[2] = pygame.mouse.get_pressed()[0]
         while(config.img):
                 pass
         config.img= True

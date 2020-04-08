@@ -5,6 +5,7 @@ import random
 import time
 from impo import *
 from PIL import Image, ImageChops
+import server_parmeters
 
 
 def drow_scoewer(screen,x,y,color,border,scower):
@@ -17,12 +18,11 @@ def drowtext(screen,x,y,size,text):
     textRect.center = (x, y)
     screen.blit(text, textRect)
 
-def main_sean(name,pos,socket,mts):
+def main_sean(screen,clock,name,socket,mts):
     ww=700
     wh=700
 
-    pygame.init()
-    size =(ww,wh)
+
 
 
     scower = 30
@@ -35,9 +35,7 @@ def main_sean(name,pos,socket,mts):
     black =(0,0,0)
     fr =60
 
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption(str(name))
+
 
     speed=6
 
@@ -120,19 +118,19 @@ def main_sean(name,pos,socket,mts):
                 if (snake[i]== t):
                     snake.pop(i)
 
-            if pos.value ==1:
+            if server_parmeters.pos.value ==1:
                 last_point=[last_point[0]+1,last_point[1]]
                 if last_point[0]+1==21:
                     last_point[0]= 0
-            if pos.value==2:
+            if server_parmeters.pos.value==2:
                 last_point=[last_point[0],last_point[1]+1]
                 if last_point[1]+1==21:
                     last_point[1]= 0
-            if pos.value==3:
+            if server_parmeters.pos.value==3:
                 last_point=[last_point[0]-1,last_point[1]]
                 if last_point[0]-1==-2:
                     last_point[0]= 19
-            if pos.value==4:
+            if server_parmeters.pos.value==4:
                 last_point=[last_point[0],last_point[1]-1]
                 if last_point[1]-1==-2:
                     last_point[1]= 19
