@@ -15,138 +15,81 @@ import os
 from Tkinter import *
 import gui_for_pro
 from PIL import Image, ImageChops
-
-
-
+import pickle
 
 
 def client():
+
     config.name = gui_for_pro.reg()
-
-
-
     my_socket = socket.socket()
-
-
-
     my_socket.connect((raw_input("Enter your server ip: ") ,1720))
 
     t = True
     f = True
-    data =""
+    last_mouse = range(3)
+    data = ""
 
-    lat = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"lates.png", "w")
-    lat.close()
-    img1 = Image.open('C:\Users\Itay\PycharmProjects\itay\project\images\p3.png')
-    diff = ImageChops.difference(img1,img1)
-    diff.save("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"lates.png")
-    diff.close()
-    img1.close()
+    config.lat = np.zeros((700,700,3),dtype=np.uint8)
+    config.old = np.zeros((700,700,3),dtype=np.uint8)
 
 
-
+    lat_pos= 0
 
     while True:
         rlist, wlist, xlist = select.select( [my_socket] ,  [my_socket], [])
+        if config.fin:
+            my_socket.send("")
+            break
 
         if f:
             f=False
             my_socket.send(str(config.name)+"name")
 
-        elif config.pos!=0:
-            my_socket.send(str(config.pos))
-            config.pos =0
+        elif config.pos!=lat_pos:
+            my_socket.send(str(config.pos)+"pos")
+            lat_pos = config.pos
+        elif config.mouse!=last_mouse:
+
+            my_socket.send( str(config.mouse[0]) +" "+ str(config.mouse[1])+ " "+str(config.mouse[2])+ "mouse" )
+            last_mouse[0] =  config.mouse[0]
+            last_mouse[1] =  config.mouse[1]
+            last_mouse[2] =  config.mouse[2]
 
         if  len(rlist)>0:
 
             data +=my_socket.recv(5000000)
+            #print data
             if len(data) >6 and data[-6::]=="endend":
 
                 data = data[:-6:]
+
                 if  data == "quit":
 
                     config.fin = True
                     break
-                # print data
+
 
                 while(config.img):
                     pass
                 config.img= True
-
-                old = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"old.png", "w")
-                dif = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"diff.png", "w")
-                old.close()
-
-                dif.close()
-
-                lat = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"lates.png","rb")
-                old = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"old.png","wb")
-                old.seek(0)
-                old.truncate()
-                lat.seek(0)
-                old.write(lat.read())
-                old.close()
-                lat.close()
-
-                dif = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"diff.png", "wb")
-                dif.seek(0)
-                dif.truncate()
-                dif.close()
-
-                lat = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"lates.png","wb")
-                lat.seek(0)
-                lat.truncate()
-                lat.close()
-
-                dif = open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"diff.png", "wb")
-                dif.write(data)
-                dif.close()
-
-                old= Image.open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"old.png")
-                dif= Image.open("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"diff.png")
-                let =(ImageChops.difference(old,dif))
-                let.save("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"lates.png")
-
-                old.close()
-                dif.close()
-                let.close()
-
+                config.old = config.lat
+                diff = np.frombuffer((((data.decode("zlib")))), dtype=np.uint8).reshape(700, 700,3)
+                config.lat =np.bitwise_xor(config.old,diff)
                 config.img= False
-                data =""
+                data = ""
                 if t:
-
                     graf = threading.Thread(target=game1)
                     graf.start()
                     t = False
-
-
     my_socket.close()
 
 
-
-
-
-
 def game1():
-    #global config.pos       # Optional if you treat a as read-only
-
-
-    ww=700
-    wh=700
-
+    ww = 700
+    wh = 700
     pygame.init()
-    size =(ww,wh)
-
-
-
-    white =(255,255,255)
-    gray =(100,100,100)
-    red = (255,0,0)
-    blue =(0,0,255)
-    green = (0,255,0)
-    black =(0,0,0)
-
-    fr =10
+    size = (ww,wh)
+    fr = 60
 
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode(size)
@@ -170,11 +113,27 @@ def game1():
                 if event.key == pygame.K_LEFT:
 
                     config.pos = 3
+            elif  event.type == pygame.KEYUP:
+                if event.key == pygame.K_UP:
+
+                    config.pos = 0
+                if event.key == pygame.K_DOWN:
+
+                    config.pos = 0
+                if event.key == pygame.K_RIGHT:
+
+                    config.pos = 0
+                if event.key == pygame.K_LEFT:
+
+                    config.pos = 0
+        config.mouse[0] = pygame.mouse.get_pos()[0]
+        config.mouse[1] = pygame.mouse.get_pos()[1]
+        config.mouse[2] = pygame.mouse.get_pressed()[0]
         while(config.img):
                 pass
         config.img= True
-        p = pygame.image.load("C:\Users\Itay\PycharmProjects\itay\project\images\\"+config.name+"lates.png")
-        screen.blit(p, (0,0))
+        pygame.surfarray.blit_array(screen, config.lat)
+
         config.img= False
 
 
