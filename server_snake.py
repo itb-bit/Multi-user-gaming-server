@@ -9,6 +9,7 @@ import server_parmeters
 import server_screen
 import color
 from multiprocessing import Process, Queue, Pipe, Value,Array
+import threading
 
 def drow_scoewer(screen,x,y,color1,border,scower):
     pygame.draw.rect(screen, color1,(border+x*(1+scower)+1,border+y*(1+scower)+1,scower,scower))
@@ -88,6 +89,13 @@ def main_sean(screen,clock,speed = 6):
 
         drow_scoewer(screen,last_point[0],last_point[1],color.green,border,scower)
 
+        if lost:
+            # print 1
+            return score
+
+        else:
+            mt +=1
+
         if mt ==60/speed:
 
 
@@ -101,19 +109,19 @@ def main_sean(screen,clock,speed = 6):
             if server_parmeters.pos.value != 0:
                 last = server_parmeters.pos.value
 
-            if last ==1:
+            if last%2 ==1:
                 last_point=[last_point[0]+1,last_point[1]]
                 if last_point[0]+1==21:
                     last_point[0]= 0
-            if last==2:
+            elif (last/2)%2==1:
                 last_point=[last_point[0],last_point[1]+1]
                 if last_point[1]+1==21:
                     last_point[1]= 0
-            if last==3:
+            elif (last/4)%2==1:
                 last_point=[last_point[0]-1,last_point[1]]
                 if last_point[0]-1==-2:
                     last_point[0]= 19
-            if last==4:
+            elif (last/8)%2==1:
                 last_point=[last_point[0],last_point[1]-1]
                 if last_point[1]-1==-2:
                     last_point[1]= 19
@@ -126,18 +134,17 @@ def main_sean(screen,clock,speed = 6):
 
 
 
-        # pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
+            # pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
 
-        if mt ==0:
+
+
+
+            pygame.display.flip()
+
             server_screen.sending_info()
 
-        if lost:
-            # print 1
-            return score
 
-        else:
-            mt +=1
-        pygame.display.flip()
+
 
         clock.tick(fr)
 

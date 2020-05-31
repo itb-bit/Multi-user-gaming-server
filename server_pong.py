@@ -5,17 +5,140 @@ import math
 import random
 import numpy as np
 import time
-import server_parmeters
+import pong_parmeters
+import color
 
 
 
 def drowtext(screen,x,y,size,text):
-    white =(255,255,255)
+
     font = pygame.font.Font('freesansbold.ttf', size)
-    text = font.render(text,True,white)
+    text = font.render(text,True,color.white)
     textRect = text.get_rect()
     textRect.center = (x, y)
     screen.blit(text, textRect)
+def drowtextbl(screen,x,y,size,text):
+
+    font = pygame.font.Font('freesansbold.ttf', size)
+    text = font.render(text,True,color.black)
+    textRect = text.get_rect()
+    textRect.center = (x, y)
+    screen.blit(text, textRect)
+
+def main_pong(mts,name1,pos1,socket1,mouse1,com1,name2,pos2,socket2,mouse2,com2):
+    ww=700
+    wh=700
+
+    pygame.init()
+    size =(ww,wh)
+
+
+
+    clock = pygame.time.Clock()
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption(str("pong"))
+
+
+
+
+
+    pong_parmeters.mouse1 = mouse1
+    pong_parmeters.pos1 = pos1
+    pong_parmeters.name1 = name1
+    pong_parmeters.socket1 = socket1
+    pong_parmeters.mouse2 = mouse2
+    pong_parmeters.pos2 = pos2
+    pong_parmeters.name2 = name2
+    pong_parmeters.socket2q = socket2
+    pong_parmeters.socket2 = ""
+    pong_parmeters.mts = mts
+    pong_parmeters.screen = screen
+
+    pong_parmeters.lat = np.zeros((700,700,3),dtype=np.uint8)
+    pong_parmeters.old = np.zeros((700,700,3),dtype=np.uint8)
+
+    finish = False
+    while  pong_parmeters.socket2q.empty():
+        loading(screen,clock,30)
+    pong_parmeters.socket2=pong_parmeters.socket2q.get()
+    t= pong(screen,clock)
+    if  t== "quit":
+        finish=True
+
+
+
+    pygame.quit()
+    if  finish:
+        mts.put((pong_parmeters.socket1, "quit"))
+        mts.put((pong_parmeters.socket2, "quit"))
+    else:
+        com1.value= 1
+        com2.value= 1
+
+
+def loading(screen,clock,time1):
+
+    finese= False
+    quity = time1
+    b = 16
+    j = b-1
+    c =0
+
+    rangel = 150
+    while not finese:
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                finese = True
+        screen.fill(color.white)
+        drowtextbl(screen,350,100,40,"searching for a worthy opponent ...")
+        for i in  xrange(0,b) :
+            if  i !=j:
+                pygame.draw.circle(screen, color.red, [350+ int(rangel*math.sin(i*(math.pi*2/b))),350+ int(rangel*math.cos(i*(math.pi*2/b)))], 20)
+        pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
+        c +=1
+        if c==6:
+            c= 0
+            j-=1
+        if  j==-1:
+            j=b-1
+
+
+        if  quity == 0:
+            return "hi"
+        quity -= 1
+
+        pygame.display.flip()
+        sending_info()
+        clock.tick(pong_parmeters.fr)
+
+
+def sending_info():
+    tm =time.time()
+
+    pong_parmeters.old = pong_parmeters.lat
+
+    # print time.time() - tm
+    pong_parmeters.lat = pygame.surfarray.array3d(pong_parmeters.screen)
+
+    # print time.time() - tm
+    diff = np.bitwise_xor(pong_parmeters.old,pong_parmeters.lat)
+
+    # print time.time() - tm
+    en= (diff).tobytes()
+
+    # print time.time() - tm
+    c = en.encode("zlib")
+
+    # print time.time() - tm
+    pong_parmeters.mts.put((pong_parmeters.socket1, c))
+    if  pong_parmeters.socket2 != "":
+        pong_parmeters.mts.put((pong_parmeters.socket2, c))
+
+    print time.time() - tm
+
+    # print "___________"
 
 
 def pong(screen,clock):
@@ -53,20 +176,6 @@ def pong(screen,clock):
 
 
 
-
-    white =(255,255,255)
-    gray =(100,100,100)
-    red = (255,0,0)
-    blue =(0,0,255)
-    green = (0,255,0)
-    black =(0,0,0)
-    lblue = (51, 204, 255)
-    orenge = (255, 153, 51)
-    yellow = (255, 255, 0)
-    perpole = (153, 0, 204)
-
-
-
     fr =60
     speed =10
 
@@ -78,33 +187,35 @@ def pong(screen,clock):
             if event.type == pygame.QUIT:
                 return "quit"
 
-        if server_parmeters.pos.value ==-1:
+        if pong_parmeters.pos1.value ==-1:
+            return "quit"
+        if pong_parmeters.pos2.value ==-1:
             return "quit"
 
-        if server_parmeters.pos== 1:
+        if pong_parmeters.pos1.value/8%2== 1:
             p2c = -speed
-        if server_parmeters.pos== 2:
+        if pong_parmeters.pos1.value/2%2== 1:
 
             p2c = speed
 
-        if event.key == pygame.K_w:
+        if pong_parmeters.pos2.value/8%2== 1:
 
             p1c = -speed
-        if event.key == pygame.K_s:
+        if pong_parmeters.pos2.value/2%2== 1:
 
             p1c = speed
 
-        if event.key == pygame.K_UP:
+        if pong_parmeters.pos1.value/8%2== 0:
 
             p2c = 0
-        if event.key == pygame.K_DOWN:
+        if pong_parmeters.pos1.value/2%2== 0:
 
             p2c = 0
 
-        if event.key == pygame.K_w:
+        if pong_parmeters.pos2.value/2%2== 0:
 
             p1c = 0
-        if event.key == pygame.K_s:
+        if pong_parmeters.pos2.value/2%2== 0:
 
             p1c = 0
 
@@ -112,10 +223,10 @@ def pong(screen,clock):
 
 
 
-        screen.fill(black)
+        screen.fill(color.black)
 
         for i in xrange(0,14) :
-            pygame.draw.rect(screen, white,[345,i*50+25,10,25])
+            pygame.draw.rect(screen, color.white,[345,i*50+25,10,25])
 
 
         if (p2p + p2c  >=0 and p2p + p2c +len  < wh):
@@ -126,9 +237,14 @@ def pong(screen,clock):
         drowtext(screen,500,100,50,str(p2s))
         drowtext(screen,200,100,50,str(p1s))
 
-        pygame.draw.rect(screen, white,[50,p1p,20,len])
+        if p2s ==11:
+            return 2
+        if  p1s ==11:
+            return 1
 
-        pygame.draw.rect(screen, white,[630,p2p,20,len])
+        pygame.draw.rect(screen, color.white,[50,p1p,20,len])
+
+        pygame.draw.rect(screen, color.white,[630,p2p,20,len])
 
 
         if (b[1]+bm[1] -br <0 or b[1]+bm[1] +br  >= wh):
@@ -168,13 +284,15 @@ def pong(screen,clock):
         b = np.add(b,bm)
 
 
-        pygame.draw.circle(screen, gray, b, br)
 
-        pygame.draw.circle(screen, green, pygame.mouse.get_pos(), 10)
+
+        pygame.draw.circle(screen, color.gray, b, br)
+
+
 
 
         pygame.display.flip()
-
+        sending_info()
         clock.tick(fr)
 
 

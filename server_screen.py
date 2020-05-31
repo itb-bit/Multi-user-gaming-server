@@ -17,7 +17,7 @@ import server_snake
 import server_parmeters
 from multiprocessing import Process, Queue, Pipe, Value,Array
 
-def main_sean(name,pos,socket,mts,mouse ):
+def main_sean(name,pos,socket,mts,mouse,com):
     ww=700
     wh=700
 
@@ -52,15 +52,17 @@ def main_sean(name,pos,socket,mts,mouse ):
             s= snake_speed(screen,clock)
             if (s== "quit"):
                 finish = True
-            t = server_snake.main_sean(screen,clock,s)
-            if (t== "quit"):
-                finish = True
+            else:
+                t = server_snake.main_sean(screen,clock,s)
+                if (t== "quit"):
+                    finish = True
         elif(g== "p"):
-            #t = server_pong.pong(screen,clock)
-            #if (t== "quit"):
 
-                #finish = True
-            pass
+            loading(screen,clock,30)
+            black_screen(screen,clock,1)
+            com.value = 2
+            break
+
         elif(g== "a"):
             pass
         elif(g== "t"):
@@ -71,7 +73,8 @@ def main_sean(name,pos,socket,mts,mouse ):
 
 
     pygame.quit()
-    mts.put((socket, "quit"))
+    if  finish:
+        mts.put((socket, "quit"))
 
 
 
@@ -79,6 +82,8 @@ def main_sean(name,pos,socket,mts,mouse ):
 
 def sending_info():
     tm =time.time()
+
+
     server_parmeters.old = server_parmeters.lat
 
     # print time.time() - tm
@@ -96,7 +101,7 @@ def sending_info():
     # print time.time() - tm
     server_parmeters.mts.put((server_parmeters.socket, c))
 
-    # print time.time() - tm
+    time.time() - tm
 
     # print "___________"
 

@@ -62,8 +62,9 @@ def first_sean(screen,clock):
             server_parmeters.mouse[2] =0
             return "t"
 
-        server_screen.sending_info()
+
         pygame.display.flip()
+        server_screen.sending_info()
         clock.tick(server_parmeters.fr)
 
 def snake_speed(screen,clock):
@@ -98,16 +99,16 @@ def snake_speed(screen,clock):
 
             return 15
 
-        server_screen.sending_info()
 
         pygame.display.flip()
+        server_screen.sending_info()
         clock.tick(server_parmeters.fr)
-def black_screen(screen,clock):
+def black_screen(screen,clock,time1):
 
 
 
-    quity = 60*5
-
+    quity = time1
+    t = False
 
     finese= False
 
@@ -124,9 +125,48 @@ def black_screen(screen,clock):
             return "hi"
         quity -= 1
 
-        server_screen.sending_info()
 
         pygame.display.flip()
+        if  not t:
+            server_screen.sending_info()
+            t = True
+        clock.tick(server_parmeters.fr)
+
+def loading(screen,clock,time1):
+
+    finese= False
+    quity = time1
+    b = 16
+    j = b-1
+    c =0
+    cmax =6
+    rangel = 150
+    while not finese:
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                finese = True
+        screen.fill(color.white)
+        drowtext(screen,350,100,40,"loading ...")
+        for i in  xrange(0,b) :
+            if  i !=j:
+                pygame.draw.circle(screen, color.red, [350+ int(rangel*math.sin(i*(math.pi*2/b))),350+ int(rangel*math.cos(i*(math.pi*2/b)))], 20)
+        pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
+        c +=1
+        if c==cmax:
+            c= 0
+            j-=1
+        if  j==-1:
+            j=b-1
+
+
+        if  quity == 0:
+            return "hi"
+        quity -= 1
+
+        pygame.display.flip()
+        server_screen.sending_info()
         clock.tick(server_parmeters.fr)
 
 def main():

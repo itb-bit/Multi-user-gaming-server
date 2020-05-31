@@ -5,5 +5,6 @@ img = False
 name = "dave"
 fin = False
 mouse = range(0,3)
+sip = ''
 lat = []
 old = []

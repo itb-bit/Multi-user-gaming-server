@@ -3,26 +3,18 @@ from PIL import Image
 
 import socket
 import select
-import msvcrt
 import pygame
-import math
-import random
 import threading
-import time
 import config
 import numpy as np
-import os
-from Tkinter import *
 import gui_for_pro
-from PIL import Image, ImageChops
-import pickle
 
 
 def client():
 
     config.name = gui_for_pro.reg()
     my_socket = socket.socket()
-    my_socket.connect((raw_input("Enter your server ip: ") ,1720))
+    my_socket.connect((config.sip ,1720))
 
     t = True
     f = True
@@ -56,8 +48,11 @@ def client():
             last_mouse[2] =  config.mouse[2]
 
         if  len(rlist)>0:
-
-            data +=my_socket.recv(5000000)
+            try:
+                data +=my_socket.recv(5000000)
+            except:
+                config.fin = True
+                break
             #print data
             if len(data) >6 and data[-6::]=="endend":
 
@@ -69,11 +64,13 @@ def client():
                     break
 
 
+
+
+                config.old = config.lat
+                diff = np.frombuffer((((data.decode("zlib")))), dtype=np.uint8).reshape(700, 700,3)
                 while(config.img):
                     pass
                 config.img= True
-                config.old = config.lat
-                diff = np.frombuffer((((data.decode("zlib")))), dtype=np.uint8).reshape(700, 700,3)
                 config.lat =np.bitwise_xor(config.old,diff)
                 config.img= False
                 data = ""
@@ -100,37 +97,37 @@ def game1():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 config.fin = True
-            elif  event.type == pygame.KEYDOWN:
+            if  event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
 
-                    config.pos = 4
+                    config.pos += 8
                 if event.key == pygame.K_DOWN:
 
-                    config.pos = 2
+                    config.pos += 2
                 if event.key == pygame.K_RIGHT:
 
-                    config.pos = 1
+                    config.pos += 1
                 if event.key == pygame.K_LEFT:
 
-                    config.pos = 3
-            elif  event.type == pygame.KEYUP:
+                    config.pos += 4
+            if  event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
 
-                    config.pos = 0
+                    config.pos -= 8
                 if event.key == pygame.K_DOWN:
 
-                    config.pos = 0
+                    config.pos -= 2
                 if event.key == pygame.K_RIGHT:
 
-                    config.pos = 0
+                    config.pos -= 1
                 if event.key == pygame.K_LEFT:
 
-                    config.pos = 0
+                    config.pos -= 4
         config.mouse[0] = pygame.mouse.get_pos()[0]
         config.mouse[1] = pygame.mouse.get_pos()[1]
         config.mouse[2] = pygame.mouse.get_pressed()[0]
         while(config.img):
-                pass
+               pass
         config.img= True
         pygame.surfarray.blit_array(screen, config.lat)
 
@@ -154,8 +151,6 @@ def main():
     client1 = threading.Thread(target=client)
 
     client1.start()
-
-
 
 if __name__ == '__main__':
     main()
