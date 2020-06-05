@@ -28,15 +28,19 @@ def multyplayer():
     emty_pong=True
     pongs= []
 
-    name2 =  Array('c', 'name')
-    pos2 = Value('i', 1)
-    socket2 = Queue()
-    mouse2 = Array('i', range(3))
-    com2 = Value('i', 1)
+
     while True:
         for i in server_var.limpo.values():
             if  i.com.value== 2:
+
                 if emty_pong:
+                    name2 =  Array('c', 'name')
+                    pos2 = Value('i', 1)
+                    socket2 = Queue()
+                    mouse2 = Array('i', range(3))
+                    com2 = Value('i', 1)
+
+
                     i.tread = Process(target=server_pong.main_pong,args=(server_var.mts,i.name,i.pos,str(i.socket),
                     i.mouse,i.com,name2,pos2,socket2,mouse2,com2,))
                     pongs.append(i.tread)
@@ -45,16 +49,18 @@ def multyplayer():
                 else:
 
                     name2.value = i.name
-                    pos2 = i.pos
+                    i.pos = pos2
                     socket2.put(str(i.socket))
-                    mouse2 = i.mouse
-                    com2= i.com
+                    i.mouse =mouse2
+                    i.com = com2
+                    i.com.value= 0
 
                 emty_pong = not emty_pong
             if  i.com.value== 1:
-                i.tread = Process(target=server_screen.main_sean,args=(i.name,i.pos,i.socket ,server_var.mts,i.mouse,i.com,))
-                i.tread.start()
 
+                i.tread = Process(target=server_screen.main_sean,args=(i.name,i.pos,str(i.socket),server_var.mts,i.mouse,i.com,))
+                i.tread.start()
+                i.com.value= 0
 
 def server1():
 

@@ -59,7 +59,7 @@ def main_sean(name,pos,socket,mts,mouse,com):
         elif(g== "p"):
 
             loading(screen,clock,30)
-            black_screen(screen,clock,1)
+            black_screen(screen,clock,3)
             com.value = 2
             break
 

@@ -59,7 +59,8 @@ def main_pong(mts,name1,pos1,socket1,mouse1,com1,name2,pos2,socket2,mouse2,com2)
 
     finish = False
     while  pong_parmeters.socket2q.empty():
-        loading(screen,clock,30)
+        loading(screen,clock,96)
+    black_screen(screen,clock,10)
     pong_parmeters.socket2=pong_parmeters.socket2q.get()
     t= pong(screen,clock)
     if  t== "quit":
@@ -67,14 +68,45 @@ def main_pong(mts,name1,pos1,socket1,mouse1,com1,name2,pos2,socket2,mouse2,com2)
 
 
 
-    pygame.quit()
+
     if  finish:
         mts.put((pong_parmeters.socket1, "quit"))
         mts.put((pong_parmeters.socket2, "quit"))
     else:
+        black_screen(screen,clock,3)
         com1.value= 1
         com2.value= 1
 
+    pygame.quit()
+
+def black_screen(screen,clock,time1):
+
+
+
+    quity = time1
+
+
+    finese= False
+
+    while not finese:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finese = True
+                return "quit"
+
+        if pong_parmeters.pos1.value ==-1:
+            return "quit"
+
+        screen.fill(color.black)
+        if  quity == 0:
+            return "hi"
+        quity -= 1
+
+
+        pygame.display.flip()
+
+        sending_info()
+        clock.tick(pong_parmeters .fr)
 
 def loading(screen,clock,time1):
 
@@ -97,20 +129,24 @@ def loading(screen,clock,time1):
             if  i !=j:
                 pygame.draw.circle(screen, color.red, [350+ int(rangel*math.sin(i*(math.pi*2/b))),350+ int(rangel*math.cos(i*(math.pi*2/b)))], 20)
         pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
+
+
         c +=1
         if c==6:
             c= 0
             j-=1
+            pygame.display.flip()
+            sending_info()
         if  j==-1:
             j=b-1
+
 
 
         if  quity == 0:
             return "hi"
         quity -= 1
 
-        pygame.display.flip()
-        sending_info()
+
         clock.tick(pong_parmeters.fr)
 
 
@@ -179,6 +215,7 @@ def pong(screen,clock):
     fr =60
     speed =10
 
+    ttnm =0
 
     while not finese:
 
@@ -205,17 +242,17 @@ def pong(screen,clock):
 
             p1c = speed
 
-        if pong_parmeters.pos1.value/8%2== 0:
+        if p2c == -speed and pong_parmeters.pos1.value/8%2== 0:
 
             p2c = 0
-        if pong_parmeters.pos1.value/2%2== 0:
+        if p2c == speed and pong_parmeters.pos1.value/2%2== 0:
 
             p2c = 0
 
-        if pong_parmeters.pos2.value/2%2== 0:
+        if p1c == -speed and pong_parmeters.pos2.value/8%2== 0:
 
             p1c = 0
-        if pong_parmeters.pos2.value/2%2== 0:
+        if p1c == speed and pong_parmeters.pos2.value/2%2== 0:
 
             p1c = 0
 
@@ -292,7 +329,11 @@ def pong(screen,clock):
 
 
         pygame.display.flip()
-        sending_info()
+
+        if  ttnm == 0:
+            sending_info()
+            ttnm = 2
+        ttnm -=1
         clock.tick(fr)
 
 

@@ -20,6 +20,8 @@ def client():
     f = True
     last_mouse = range(3)
     data = ""
+    config.img = threading.Event()
+    config.img.set()
 
     config.lat = np.zeros((700,700,3),dtype=np.uint8)
     config.old = np.zeros((700,700,3),dtype=np.uint8)
@@ -54,9 +56,12 @@ def client():
                 config.fin = True
                 break
             #print data
-            if len(data) >6 and data[-6::]=="endend":
 
-                data = data[:-6:]
+
+            if len(data)>6 and data[-6::] == "endend" :
+
+                data= data[:-6:]
+
 
                 if  data == "quit":
 
@@ -67,17 +72,25 @@ def client():
 
 
                 config.old = config.lat
+
                 diff = np.frombuffer((((data.decode("zlib")))), dtype=np.uint8).reshape(700, 700,3)
-                while(config.img):
+
+                try:
+                    config.img.wait()
+                    config.img.clear()
+                    config.lat =np.bitwise_xor(config.old,diff)
+                    config.img.set()
+                    data = ""
+                    if t:
+                        graf = threading.Thread(target=game1)
+                        graf.start()
+                        t = False
+                except:
                     pass
-                config.img= True
-                config.lat =np.bitwise_xor(config.old,diff)
-                config.img= False
-                data = ""
-                if t:
-                    graf = threading.Thread(target=game1)
-                    graf.start()
-                    t = False
+
+
+
+
     my_socket.close()
 
 
@@ -126,17 +139,14 @@ def game1():
         config.mouse[0] = pygame.mouse.get_pos()[0]
         config.mouse[1] = pygame.mouse.get_pos()[1]
         config.mouse[2] = pygame.mouse.get_pressed()[0]
-        while(config.img):
-               pass
-        config.img= True
-        pygame.surfarray.blit_array(screen, config.lat)
-
-        config.img= False
-
-
-
-
-        pygame.display.flip()
+        try:
+            config.img.wait()
+            config.img.clear()
+            pygame.surfarray.blit_array(screen, config.lat)
+            config.img.set()
+            pygame.display.flip()
+        except:
+            pass
         clock.tick(fr)
 
 

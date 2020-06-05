@@ -108,7 +108,7 @@ def black_screen(screen,clock,time1):
 
 
     quity = time1
-    t = False
+
 
     finese= False
 
@@ -127,9 +127,8 @@ def black_screen(screen,clock,time1):
 
 
         pygame.display.flip()
-        if  not t:
-            server_screen.sending_info()
-            t = True
+
+        server_screen.sending_info()
         clock.tick(server_parmeters.fr)
 
 def loading(screen,clock,time1):
@@ -157,6 +156,9 @@ def loading(screen,clock,time1):
         if c==cmax:
             c= 0
             j-=1
+            pygame.display.flip()
+            server_screen.sending_info()
+
         if  j==-1:
             j=b-1
 
@@ -165,8 +167,7 @@ def loading(screen,clock,time1):
             return "hi"
         quity -= 1
 
-        pygame.display.flip()
-        server_screen.sending_info()
+
         clock.tick(server_parmeters.fr)
 
 def main():
