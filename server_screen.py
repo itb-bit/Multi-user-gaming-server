@@ -1,21 +1,11 @@
 # -*- coding: utf-8 -*-
-import pygame
-import math
-import random
+
 import time
-from impo import *
-from PIL import Image, ImageChops
-import threading
-import mmap
 import numpy as np
-import base64
-import gzip
-import pickle
 from server_menu import *
-import server_pong
 import server_snake
 import server_parmeters
-from multiprocessing import Process, Queue, Pipe, Value,Array
+
 
 def main_sean(name,pos,socket,mts,mouse,com):
     ww=700

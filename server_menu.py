@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import pygame
 import math
-import random
 import server_parmeters
 import server_screen
-from multiprocessing import Process, Queue, Pipe, Value,Array
 import color
 
 def botten(screen,x,y,ww,wh,color1,text = "",chanse=False):

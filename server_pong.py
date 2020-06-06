@@ -2,7 +2,6 @@
 
 import pygame
 import math
-import random
 import numpy as np
 import time
 import pong_parmeters
@@ -172,7 +171,7 @@ def sending_info():
     if  pong_parmeters.socket2 != "":
         pong_parmeters.mts.put((pong_parmeters.socket2, c))
 
-    print time.time() - tm
+    # print time.time() - tm
 
     # print "___________"
 
@@ -338,12 +337,3 @@ def pong(screen,clock):
 
 
 
-def main():
-    """
-    Add Documentation here
-    """
-    pass  # Replace Pass with Your Code
-
-
-if __name__ == '__main__':
-    main()

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from PIL import Image
-
 import socket
 import select
 import pygame
