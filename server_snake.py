@@ -5,43 +5,28 @@ import random
 import time
 from impo import *
 from PIL import Image, ImageChops
+import server_parmeters
+import server_screen
+import color
+from multiprocessing import Process, Queue, Pipe, Value,Array
+import threading
 
-
-def drow_scoewer(screen,x,y,color,border,scower):
-    pygame.draw.rect(screen, color,(border+x*(1+scower)+1,border+y*(1+scower)+1,scower,scower))
+def drow_scoewer(screen,x,y,color1,border,scower):
+    pygame.draw.rect(screen, color1,(border+x*(1+scower)+1,border+y*(1+scower)+1,scower,scower))
 
 def drowtext(screen,x,y,size,text):
     font = pygame.font.Font('freesansbold.ttf', size)
-    text = font.render(text,True,(0,0,0))
+    text = font.render(text,True,color.black)
     textRect = text.get_rect()
     textRect.center = (x, y)
     screen.blit(text, textRect)
 
-def main_sean(name,pos,socket,mts):
-    ww=700
-    wh=700
-
-    pygame.init()
-    size =(ww,wh)
-
-
+def main_sean(screen,clock,speed = 6):
+    ww = 700
+    wh = 700
     scower = 30
     border = (ww-(scower*20+20))/2
-    white =(255,255,255)
-    gray =(100,100,100)
-    red = (255,0,0)
-    blue =(0,0,255)
-    green = (0,255,0)
-    black =(0,0,0)
     fr =60
-
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption(str(name))
-
-    speed=6
-
-
     t =0
     mt =0
 
@@ -53,22 +38,16 @@ def main_sean(name,pos,socket,mts):
     chenes= True
     apple = [14,14]
     lost = False
+    last = 1
 
-    old = open("C:\Users\Itay\PycharmProjects\itay\project\images\\erly"+name+".png", "w")
-    old.close()
-    dif = open("C:\Users\Itay\PycharmProjects\itay\project\images\\diff"+name+".png","w")
-    dif.close()
 
 
     while not finese:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                mts.put((socket, "quit"))
-                finese = True
-                print 2
-
-
-
+                return "quit"
+        if server_parmeters.pos.value == -1:
+            return "quit"
 
         if(last_point[0]==apple[0] and last_point[1]==apple[1]):
             lenf +=1
@@ -88,12 +67,12 @@ def main_sean(name,pos,socket,mts):
 
 
 
-        screen.fill(gray)
-        pygame.draw.rect(screen, white,(border,border,ww-border*2,ww-border*2))
+        screen.fill(color.gray)
+        pygame.draw.rect(screen, color.white,(border,border,ww-border*2,ww-border*2))
         for i in xrange(0,21):
-            pygame.draw.line(screen, black,(border,border+scower*i+i),(ww-border,border+scower*i+i), 1)
+            pygame.draw.line(screen,color.black,(border,border+scower*i+i),(ww-border,border+scower*i+i), 1)
         for i in xrange(0,21):
-            pygame.draw.line(screen, black,(border+scower*i+i,border),(border+scower*i+i,ww-border ), 1)
+            pygame.draw.line(screen,color.black,(border+scower*i+i,border),(border+scower*i+i,ww-border ), 1)
 
         score =  (lenf - 3)
         drowtext(screen,350,30,30,"score " + str(score))
@@ -103,12 +82,19 @@ def main_sean(name,pos,socket,mts):
 
 
         for i in snake:
-            drow_scoewer(screen,int(i[0:i.find(",")]),int(i[i.find(",")+1:]),blue,border,scower)
+            drow_scoewer(screen,int(i[0:i.find(",")]),int(i[i.find(",")+1:]),color.blue,border,scower)
 
 
-        drow_scoewer(screen,apple[0],apple[1],red,border,scower)
+        drow_scoewer(screen,apple[0],apple[1],color.red,border,scower)
 
-        drow_scoewer(screen,last_point[0],last_point[1],green,border,scower)
+        drow_scoewer(screen,last_point[0],last_point[1],color.green,border,scower)
+
+        if lost:
+            # print 1
+            return score
+
+        else:
+            mt +=1
 
         if mt ==60/speed:
 
@@ -120,19 +106,22 @@ def main_sean(name,pos,socket,mts):
                 if (snake[i]== t):
                     snake.pop(i)
 
-            if pos.value ==1:
+            if server_parmeters.pos.value != 0:
+                last = server_parmeters.pos.value
+
+            if last%2 ==1:
                 last_point=[last_point[0]+1,last_point[1]]
                 if last_point[0]+1==21:
                     last_point[0]= 0
-            if pos.value==2:
+            elif (last/2)%2==1:
                 last_point=[last_point[0],last_point[1]+1]
                 if last_point[1]+1==21:
                     last_point[1]= 0
-            if pos.value==3:
+            elif (last/4)%2==1:
                 last_point=[last_point[0]-1,last_point[1]]
                 if last_point[0]-1==-2:
                     last_point[0]= 19
-            if pos.value==4:
+            elif (last/8)%2==1:
                 last_point=[last_point[0],last_point[1]-1]
                 if last_point[1]-1==-2:
                     last_point[1]= 19
@@ -145,69 +134,19 @@ def main_sean(name,pos,socket,mts):
 
 
 
-        pygame.draw.circle(screen, green, pygame.mouse.get_pos(), 10)
-
-        if mt ==0:
-            tm =time.time()
-
-
-            lat = open("C:\Users\Itay\PycharmProjects\itay\project\images\\send"+name+".png", "rb")
-            old = open("C:\Users\Itay\PycharmProjects\itay\project\images\\erly"+name+".png", "wb")
-            old.seek(0)
-            old.truncate()
-            lat.seek(0)
-            old.write(lat.read())
-            old.close()
-            lat.close()
-
-            # print time.time() - tm
-
-            lat = open("C:\Users\Itay\PycharmProjects\itay\project\images\\send"+name+".png","wb")
-            lat.seek(0)
-            lat.truncate()
-            lat.close()
-
-            # print time.time() - tm
-
-            diff = open("C:\Users\Itay\PycharmProjects\itay\project\images\\diff"+name+".png", "wb")
-            diff.seek(0)
-            diff.truncate()
-            diff.close()
-
-            # print time.time() - tm
-
-            pygame.image.save(screen,"C:\Users\Itay\PycharmProjects\itay\project\images\\send"+name+".png")
-            img1 = Image.open("C:\Users\Itay\PycharmProjects\itay\project\images\\send"+name+".png")
-            img2= Image.open("C:\Users\Itay\PycharmProjects\itay\project\images\\erly"+name+".png")
+            # pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
 
 
 
-            diff = ImageChops.difference(img1,img2)
-            diff.save("C:\Users\Itay\PycharmProjects\itay\project\images\\diff"+name+".png")
 
-            diff.close()
-            img1.close()
-            img2.close()
+            pygame.display.flip()
 
-            # print time.time() - tm
-
-            dif = open("C:\Users\Itay\PycharmProjects\itay\project\images\\diff"+name+".png","rb")
+            server_screen.sending_info()
 
 
-            mts.put((socket, dif.read()))
-            dif.close()
-            # print time.time() - tm
 
-        if lost:
-            # print 1
-            mts.put((socket, "quit"))
-            finese = True
-
-        else:
-            mt +=1
-        pygame.display.flip()
 
         clock.tick(fr)
 
 
-    pygame.quit()
+
