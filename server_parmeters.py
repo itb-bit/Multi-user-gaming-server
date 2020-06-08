@@ -2,13 +2,11 @@
 
 finish = False
 fr = 60
-pos=0
+pos = 0
 mouse = range(3)
 name = ""
 socket = ""
-mts =""
+mts = ""
 screen = ""
-lat= ""
-old= ""
-
-
+lat = ""
+old = ""
