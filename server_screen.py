@@ -43,9 +43,12 @@ def main_sean(name, pos, socket, mts, mouse, com):
                     finish = True
         elif g == "p":
 
-            loading(screen, clock, 30)
-            black_screen(screen, clock, 3)
-            com.value = 2
+            t = loading(screen, clock, 30)
+            if t == "quit":
+                    finish = True
+            else:
+                black_screen(screen, clock, 3)
+                com.value = 2
             break
 
         elif g == "quit":

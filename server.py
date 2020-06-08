@@ -26,14 +26,14 @@ def send_waiting_messages(wlist):
 
 def multyplayer():
     """Moving between single-player games and multiple-player games"""
-    emty_pong = True
+    emty_pong = Value('b', True)
     pongs = []
 
     while True:
         for i in server_var.limpo.values():
             if i.com.value == 2:
 
-                if emty_pong:
+                if emty_pong.value:
                     name2 = Array('c', 'name')
                     pos2 = Value('i', 1)
                     socket2 = Queue()
@@ -42,7 +42,7 @@ def multyplayer():
 
                     i.tread = Process(target=server_pong.main_pong, args=(server_var.mts, i.name, i.pos, str(i.socket),
                                                                           i.mouse, i.com, name2, pos2, socket2, mouse2,
-                                                                          com2,))
+                                                                          com2,emty_pong ))
                     pongs.append(i.tread)
                     i.tread.start()
                     i.com.value = 0
@@ -55,7 +55,7 @@ def multyplayer():
                     i.com = com2
                     i.com.value = 0
 
-                emty_pong = not emty_pong
+                emty_pong.value = not emty_pong.value
 
             if i.com.value == 1:
 

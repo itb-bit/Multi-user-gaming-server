@@ -62,7 +62,7 @@ def main():
     """
     Add Documentation here
     """
-    reg()
+    # reg()
 
 if __name__ == '__main__':
     main()

@@ -26,7 +26,7 @@ def drowtextbl(screen, x, y, size, text):
     screen.blit(text, textRect)
 
 
-def main_pong(mts, name1, pos1, socket1, mouse1, com1, name2, pos2, socket2, mouse2, com2):
+def main_pong(mts, name1, pos1, socket1, mouse1, com1, name2, pos2, socket2, mouse2, com2, ep):
     """The function responsible for the order of the screens in Pong"""
     ww = 700
     wh = 700
@@ -55,20 +55,35 @@ def main_pong(mts, name1, pos1, socket1, mouse1, com1, name2, pos2, socket2, mou
 
     finish = False
     while pong_parmeters.socket2q.empty():
-        loading(screen, clock, 96)
-    black_screen(screen, clock, 10)
-    pong_parmeters.socket2 = pong_parmeters.socket2q.get()
-    t = pong(screen, clock)
-    if t == "quit":
-        finish = True
+        t = loading(screen, clock, 96)
+        if t == "quit":
+            finish = True
+            ep.value = True
+            break
 
-    if finish:
+    if not finish:
+        t = black_screen(screen, clock, 10)
+        if t == "quit":
+                finish = True
+
+    if not finish:
+
+        pong_parmeters.socket2 = pong_parmeters.socket2q.get()
+
+        t = pong(screen, clock)
+        if t == "quit":
+            finish = True
+
+        if finish:
+            mts.put((pong_parmeters.socket1, "quit"))
+            mts.put((pong_parmeters.socket2, "quit"))
+        else:
+            black_screen(screen, clock, 3)
+            com1.value = 1
+            com2.value = 1
+    else:
         mts.put((pong_parmeters.socket1, "quit"))
         mts.put((pong_parmeters.socket2, "quit"))
-    else:
-        black_screen(screen, clock, 3)
-        com1.value = 1
-        com2.value = 1
 
     pygame.quit()
 
@@ -112,14 +127,18 @@ def loading(screen, clock, time1):
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                finese = True
+                return "quit"
+
+        if pong_parmeters.pos1.value == -1:
+            return "quit"
+
         screen.fill(color.white)
         drowtextbl(screen, 350, 100, 40, "searching for a worthy opponent ...")
         for i in xrange(0, b):
             if i != j:
                 pygame.draw.circle(screen, color.red, [350 + int(rangel*math.sin(i*(math.pi*2/b))),
                                                        350 + int(rangel*math.cos(i*(math.pi*2/b)))], 20)
-        pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
+        #pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
 
         c += 1
         if c == 6:
@@ -277,11 +296,11 @@ def pong(screen, clock):
             bm = [-6, 1]
             p1s += 1
 
-        if b[0] + bm[0]  >= 50 and b[0] + bm[0] <= 70:
+        if b[0] + bm[0] >= 50 and b[0] + bm[0] <= 70:
             if p1p < b[1] + br and p1p + 40 > b[1] + br:
                 bm[0] = -bm[0]
                 bm[1] -= 2
-            elif p1p  + len < b[1] - br and p1p +len  - 40 > b[1] - br:
+            elif p1p + len < b[1] - br and p1p + len - 40 > b[1] - br:
                 bm[0] = - bm[0]
                 bm[1] += 2
             elif p1p < b[1] and p1p + len > b[1]:
@@ -300,7 +319,7 @@ def pong(screen, clock):
                 bm[1] = bm[1]
         b = np.add(b, bm)
 
-        #pygame.draw.circle(screen, color.gray, b, br)
+        pygame.draw.circle(screen, color.gray, b, br)
 
         pygame.display.flip()
 

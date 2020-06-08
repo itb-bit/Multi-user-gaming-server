@@ -9,8 +9,8 @@ import color
 def button(screen, x, y, ww, wh, color1, text="", chanse=False):
     """Making a button"""
     if chanse:
-        if server_parmeters.mouse[0] >= x and server_parmeters.mouse[0] <= x+ww and \
-                        server_parmeters.mouse[1] >= y and server_parmeters.mouse[1] <= y+wh:
+        if server_parmeters.mouse[0] >= x and server_parmeters.mouse[0] <= x + ww and \
+                        server_parmeters.mouse[1] >= y and server_parmeters.mouse[1] <= y + wh:
             pygame.draw.rect(screen, color.gray, (x, y, ww, wh))
         else:
             pygame.draw.rect(screen, color1, (x, y, ww, wh))
@@ -18,8 +18,8 @@ def button(screen, x, y, ww, wh, color1, text="", chanse=False):
     else:
         pygame.draw.rect(screen, color1, (x, y, ww, wh))
     drowtext(screen, x+ww/2, y+wh/2, 20, text)
-    return server_parmeters.mouse[0] >= x and server_parmeters.mouse[0] <= x+ww and \
-           server_parmeters.mouse[1] >= y and server_parmeters.mouse[1] <= y+wh and server_parmeters.mouse[2]
+    return server_parmeters.mouse[0] >= x and server_parmeters.mouse[0] <= x + ww and \
+           server_parmeters.mouse[1] >= y and server_parmeters.mouse[1] <= y + wh and server_parmeters.mouse[2]
 
 
 def drowtext(screen, x, y, size, text):
@@ -140,13 +140,16 @@ def loading(screen, clock, time1):
 
             if event.type == pygame.QUIT:
                 finese = True
+
+        if server_parmeters.pos.value == -1:
+            return "quit"
         screen.fill(color.white)
         drowtext(screen, 350, 100, 40, "loading ...")
         for i in xrange(0, b):
             if i != j:
                 pygame.draw.circle(screen, color.red, [350+int(rangel*math.sin(i*(math.pi*2/b))),
                                                        350+int(rangel*math.cos(i*(math.pi*2/b)))], 20)
-        pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
+        # pygame.draw.circle(screen, color.green, pygame.mouse.get_pos(), 10)
         c += 1
         if c == cmax:
             c = 0
